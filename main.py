@@ -19,7 +19,7 @@ async def send(channel, message, text):
         webhooks = await channel.webhooks()
         webhook = webhooks[0]
     except IndexError:
-        await channel.create_webhook(name="Translate")
+        webhook = await channel.create_webhook(name="Translate")
     if message.attachments:
         for attachment in message.attachments:
             await webhook.send(content=text + "\n" + attachment.url,
