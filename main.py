@@ -1,5 +1,5 @@
 import discord
-import requests
+import aiohttp
 
 client = discord.Client(intents=discord.Intents.all())
 
@@ -33,9 +33,11 @@ async def send(channel, message, text):
                            )
 
 
-def tr(text, source, target):
-    r = requests.get(f"https://script.google.com/macros/s/AKfycbzowZjdWrs8td1cnJNwjmaVuSmpfR6gpYYQHNnJ6cPHDVedJXtv1K65CWtlZZ0SSgBGHQ/exec?text={text}&source={source}&target={target}")
-    return r.json()['text']
+async def tr(text, source, target):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(f"https://script.google.com/macros/s/AKfycbzowZjdWrs8td1cnJNwjmaVuSmpfR6gpYYQHNnJ6cPHDVedJXtv1K65CWtlZZ0SSgBGHQ/exec?text={text}&source={source}&target={target}") as r:
+            result = await r.json()
+            return result["text"]
 
 
 @client.event
@@ -44,14 +46,14 @@ async def on_message(message):
         return
     else:
         if message.channel == ja_ch:
-            await send(channel=en_ch, message=message, text=tr(text=message.content, source="ja", target="en"))
-            await send(channel=es_ch, message=message, text=tr(text=message.content, source="ja", target="es"))
+            await send(channel=en_ch, message=message, text=await tr(text=message.content, source="ja", target="en"))
+            await send(channel=es_ch, message=message, text=await tr(text=message.content, source="ja", target="es"))
         elif message.channel == en_ch:
-            await send(channel=ja_ch, message=message, text=tr(text=message.content, source="en", target="ja"))
-            await send(channel=es_ch, message=message, text=tr(text=message.content, source="en", target="es"))
+            await send(channel=ja_ch, message=message, text=await tr(text=message.content, source="en", target="ja"))
+            await send(channel=es_ch, message=message, text=await tr(text=message.content, source="en", target="es"))
         elif message.channel == es_ch:
-            await send(channel=ja_ch, message=message, text=tr(text=message.content, source="es", target="ja"))
-            await send(channel=en_ch, message=message, text=tr(text=message.content, source="es", target="en"))
+            await send(channel=ja_ch, message=message, text=await tr(text=message.content, source="es", target="ja"))
+            await send(channel=en_ch, message=message, text=await tr(text=message.content, source="es", target="en"))
 
 
 
